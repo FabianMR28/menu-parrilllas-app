@@ -1,0 +1,129 @@
+/* Fondo global */
+html {
+	background-color: black;
+    height: 100%;
+}
+body {
+	min-height: 100vh;
+    margin: 0;
+    font-family: "Segoe UI", Arial, sans-serif;
+    background: url('/img/fondo.jpg') no-repeat center center fixed;
+    background-size: cover;
+    color: white;
+}
+
+/* Sección inicial con logo */
+.fondo {
+    height: 100vh;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    position: relative;
+}
+
+/* Logo */
+.logo {
+    width: 250px;
+    max-width: 90%;
+    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.6));
+}
+
+/* Flecha animada */
+.flecha {
+    position: absolute;
+    bottom: 40px;
+    font-size: 3rem;
+    color: white;
+    text-decoration: none;
+    animation: bounce 1.5s infinite;
+}
+
+@keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-12px); }
+}
+
+/* Menú */
+.menu-seccion {
+    background: rgba(0, 0, 0, 0.7); /* negro translúcido */
+    border: 3px solid #b22222;      /* borde rojo */
+    border-radius: 50px;
+    padding: 40px 20px;
+    margin: 40px auto;
+    max-width: 1000px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+    text-align: center;
+    color: #ffffff; /* texto en blanco sólido */
+}
+
+/* Forzamos los enlaces también */
+.menu-seccion .nav-link {
+    color: #ffffff !important;   /* blanco sólido */
+    font-weight: 500;
+    transition: 0.3s ease;
+}
+
+.menu-seccion .nav-link:hover {
+    color: #ff4444 !important;   /* rojo al pasar el mouse */
+    text-decoration: underline;
+}
+
+.menu-seccion h2 {
+    color: #ff4444; /* título en rojo brillante */
+    font-weight: bold;
+    margin-bottom: 30px;
+}
+
+/* Enlaces del menú */
+.nav-link {
+    color: #ffffff !important;   /* blanco sólido */
+    font-size: 1.2rem;
+    margin: 0 15px;
+    font-weight: 500;
+    transition: 0.3s ease;
+}
+.nav-link:hover {
+    color: #ff4444 !important;   /* rojo brillante */
+    text-decoration: underline;
+}
+
+/*Formato de Imagen*/
+.bebida-img {
+    height: 400px;
+    object-fit: contain; /* mantiene proporción sin deformar */
+
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    padding: 10px;
+}
+
+.descripcion-plato {
+    background: rgba(0, 0, 0, 0.7); /* negro translúcido */
+    border: 3px solid #b22222;      /* borde rojo */
+    border-radius: 50px;
+    padding: 40px 20px;
+    margin: 40px auto;
+    max-width: 1000px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+    text-align: center;
+    color: #ffffff; /* texto en blanco sólido */
+}
+
+.form-control::placeholder {
+  color: rgba(255, 255, 255, 0.7); /* Ajusta el contraste */
+}
+
+.table-dark th {
+    background-color: #b22222 !important; /* encabezado rojo */
+    color: #fff !important;
+    text-align: center;
+}
+
+.table-dark td {
+    background-color: rgba(0,0,0,0.6) !important;
+    color: #fff;
+    vertical-align: middle;
+}
