@@ -12,22 +12,23 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+
 import com.example.AppWeb.model.DetallePedido;
 import com.example.AppWeb.model.Pedido;
 import com.example.AppWeb.model.Producto;
-import com.example.AppWeb.services.ProductService;
+import com.example.AppWeb.repository.ProductoRepository;
 
 @Controller
 @RequestMapping("/pedido")
 public class PedidoController {
 
     @Autowired
-    private ProductService productService;
+    private ProductoRepository productoRepository;
 
-    // Lista de pedidos guardados
+    // Lista de pedidos guardados (en memoria)
     private final List<Pedido> listaPedidos = new ArrayList<>();
 
-    // Pedido actual
+    // Pedido actual (en memoria)
     private Pedido pedidoActual = new Pedido(1L, LocalDate.now());
 
     // Mostrar pedido
@@ -42,15 +43,13 @@ public class PedidoController {
     // Agregar producto al pedido
     @PostMapping("/agregar")
     public String agregarProducto(
-            @RequestParam(name = "productoId") Long productoId,
+            @RequestParam(name = "productoId") Integer productoId,
             @RequestParam(name = "redirectUrl", required = false) String redirectUrl) {
 
-        Optional<Producto> prodOpt = productService.listarTodos().stream()
-                .filter(p -> p.getId().equals(productoId))
-                .findFirst();
+        Optional<Producto> productoOpt = productoRepository.findById(productoId);
 
-        if (prodOpt.isPresent()) {
-            Producto producto = prodOpt.get();
+        if (productoOpt.isPresent()) {
+            Producto producto = productoOpt.get();
 
             Optional<DetallePedido> detalleOpt = pedidoActual.getDetalles().stream()
                     .filter(d -> d.getProducto().getId().equals(productoId))
@@ -116,20 +115,16 @@ public class PedidoController {
             return "pedido";
         }
 
-        // Guardar el pedido actual en la lista
         listaPedidos.add(pedidoActual);
 
-        // Mostrar mensaje de confirmación
         model.addAttribute("mensaje", "¡Pedido enviado correctamente!");
         model.addAttribute("pedidoFinalizado", pedidoActual);
 
-        // Crear un nuevo pedido para seguir usando
         pedidoActual = new Pedido(pedidoActual.getId() + 1, LocalDate.now());
 
         return "pedido";
     }
 
-    // Obtener la lista de pedidos (opcional, para administración)
     public List<Pedido> getListaPedidos() {
         return listaPedidos;
     }

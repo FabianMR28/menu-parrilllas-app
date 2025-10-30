@@ -1,40 +1,54 @@
 package com.example.AppWeb.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 import com.example.AppWeb.model.Producto;
-import com.example.AppWeb.services.ProductService;
+import com.example.AppWeb.repository.ProductoRepository;
 
 @Controller
+@RequestMapping("/productos")
 public class ProductoController {
 
-	@Autowired
-    private ProductService productService;
+    private final ProductoRepository productoRepository;
 
-    // Listar productos
-    @GetMapping("/listaProductos")
-    public String listarProductos(Model model) {
-        model.addAttribute("productos", productService.listarTodos());
-        return "lista_producto"; // HTML de listado de productos
+    public ProductoController(ProductoRepository productoRepository) {
+        this.productoRepository = productoRepository;
     }
 
-    // Actualizar producto
-    @PostMapping("/admin/productos/actualizar")
-    public String actualizarProducto(@ModelAttribute Producto productoActualizado) {
-        productService.actualizarProducto(productoActualizado);
-        return "redirect:/listaProductos";
+    // Listar todos
+    @GetMapping
+    public String listarTodos(Model model) {
+        model.addAttribute("productos", productoRepository.findAll());
+        return "lista_producto";
     }
 
-    @PostMapping("/admin/productos/eliminar")
-    public String eliminarProducto(@RequestParam("id") Long id) {
-        productService.eliminarProducto(id);
-        return "redirect:/listaProductos";
+    // Listar por categoría
+    @GetMapping("/categoria")
+    public String listarPorCategoria(@RequestParam String categoria, Model model) {
+        model.addAttribute("productos", productoRepository.findByCategoria(categoria));
+        return "lista_producto";
     }
-    
+
+    // Guardar / Registrar
+    @PostMapping("/guardar")
+    public String guardar(@ModelAttribute Producto producto) {
+        productoRepository.save(producto);
+        return "redirect:/productos";
+    }
+
+    // Eliminar
+    @PostMapping("/eliminar")
+    public String eliminar(@RequestParam("id") Integer id) {
+        productoRepository.deleteById(id);
+        return "redirect:/productos";
+    }
+
+    // Actualizar
+    @PostMapping("/actualizar")
+    public String actualizar(@ModelAttribute Producto producto) {
+        productoRepository.save(producto);
+        return "redirect:/productos";
+    }
 }

@@ -1,6 +1,7 @@
 package com.example.AppWeb.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -8,41 +9,32 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.example.AppWeb.model.Producto;
-import com.example.AppWeb.services.ProductService;
+import com.example.AppWeb.repository.ProductoRepository;
 
+@Controller
 public class AdminProductoController {
-	@Autowired
-    private ProductService productService;
+
+    @Autowired
+    private ProductoRepository productoRepository;
 
     // Listar productos
     @GetMapping("/listaProductos")
     public String listarProductos(Model model) {
-        model.addAttribute("productos", productService.listarTodos());
-        return "lista_producto"; // HTML de listado de productos
+        model.addAttribute("productos", productoRepository.findAll());
+        return "lista_producto";
     }
 
-    // Actualizar producto
-    @PostMapping("/actualizar")
+    // Guardar o actualizar producto
+    @PostMapping("/admin/productos/actualizar")
     public String actualizarProducto(@ModelAttribute Producto productoActualizado) {
-        // Como ProductService tiene lista fija, simulamos la actualización:
-        productService.listarTodos().stream()
-                .filter(p -> p.getId().equals(productoActualizado.getId()))
-                .findFirst()
-                .ifPresent(p -> {
-                    p.setNombre(productoActualizado.getNombre());
-                    p.setDescripcion(productoActualizado.getDescripcion());
-                    p.setPrecio(productoActualizado.getPrecio());
-                    p.setImagen(productoActualizado.getImagen());
-                    p.setCategoria(productoActualizado.getCategoria());
-                });
+        productoRepository.save(productoActualizado); // save() inserta o actualiza
         return "redirect:/listaProductos";
     }
 
     // Eliminar producto
-    @PostMapping("/eliminar")
-    public String eliminarProducto(@RequestParam("id") Long id) {
-        // Como la lista es inmutable (Arrays.asList), aquí solo simulamos la acción
-        System.out.println("Eliminar producto con id: " + id + " (simulado)");
+    @PostMapping("/admin/productos/eliminar")
+    public String eliminarProducto(@RequestParam("id") Integer id) {
+        productoRepository.deleteById(id);
         return "redirect:/listaProductos";
     }
 }
