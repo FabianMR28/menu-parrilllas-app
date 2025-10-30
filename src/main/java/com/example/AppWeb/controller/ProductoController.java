@@ -1,5 +1,7 @@
 package com.example.AppWeb.controller;
 
+import java.util.List;
+
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -51,4 +53,22 @@ public class ProductoController {
         productoRepository.save(producto);
         return "redirect:/productos";
     }
+
+    @GetMapping("/menu")
+    public String mostrarMenu(@RequestParam(value = "busqueda", required = false) String busqueda, Model model) {
+        List<Producto> productos;
+
+        if (busqueda != null && !busqueda.isEmpty()) {
+            productos = productoRepository.findByNombreContainingIgnoreCaseOrCategoriaContainingIgnoreCase(busqueda,
+                    busqueda);
+        } else {
+            productos = productoRepository.findAll();
+        }
+
+        model.addAttribute("productos", productos);
+        model.addAttribute("busqueda", busqueda);
+
+        return "menu";
+    }
+
 }
