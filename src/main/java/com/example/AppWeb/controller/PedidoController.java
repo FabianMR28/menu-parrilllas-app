@@ -1,21 +1,17 @@
 package com.example.AppWeb.controller;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 import com.example.AppWeb.model.DetallePedido;
 import com.example.AppWeb.model.Pedido;
 import com.example.AppWeb.model.Producto;
+import com.example.AppWeb.repository.PedidoRepository;
 import com.example.AppWeb.repository.ProductoRepository;
 
 @Controller
@@ -25,11 +21,11 @@ public class PedidoController {
     @Autowired
     private ProductoRepository productoRepository;
 
-    // Lista de pedidos guardados (en memoria)
-    private final List<Pedido> listaPedidos = new ArrayList<>();
+    @Autowired
+    private PedidoRepository pedidoRepository;
 
-    // Pedido actual (en memoria)
-    private Pedido pedidoActual = new Pedido(1L, LocalDate.now());
+    // Pedido temporal (no guardado aún)
+    private Pedido pedidoActual = new Pedido();
 
     // Mostrar pedido
     @GetMapping
@@ -43,22 +39,28 @@ public class PedidoController {
     // Agregar producto al pedido
     @PostMapping("/agregar")
     public String agregarProducto(
-            @RequestParam(name = "productoId") Integer productoId,
-            @RequestParam(name = "redirectUrl", required = false) String redirectUrl) {
+            @RequestParam Integer productoId,
+            @RequestParam(required = false) String redirectUrl) {
 
         Optional<Producto> productoOpt = productoRepository.findById(productoId);
 
         if (productoOpt.isPresent()) {
             Producto producto = productoOpt.get();
 
+            // Buscar si ya existe en el pedido
             Optional<DetallePedido> detalleOpt = pedidoActual.getDetalles().stream()
-                    .filter(d -> d.getProducto().getId().equals(productoId))
+                    .filter(det -> det.getProducto().getId().equals(productoId))
                     .findFirst();
 
             if (detalleOpt.isPresent()) {
                 detalleOpt.get().setCantidad(detalleOpt.get().getCantidad() + 1);
             } else {
-                pedidoActual.getDetalles().add(new DetallePedido(producto, 1));
+                DetallePedido detalle = new DetallePedido();
+                detalle.setProducto(producto);
+                detalle.setCantidad(1);
+                detalle.setPedido(pedidoActual);
+
+                pedidoActual.getDetalles().add(detalle);
             }
         }
 
@@ -67,65 +69,65 @@ public class PedidoController {
 
     // Incrementar cantidad
     @PostMapping("/incrementar")
-    public String incrementarCantidad(
-            @RequestParam(name = "index") int index,
-            @RequestParam(name = "redirectUrl", required = false) String redirectUrl) {
+    public String incrementar(@RequestParam int index,
+                              @RequestParam(required = false) String redirectUrl) {
 
         if (index >= 0 && index < pedidoActual.getDetalles().size()) {
             DetallePedido detalle = pedidoActual.getDetalles().get(index);
             detalle.setCantidad(detalle.getCantidad() + 1);
         }
+
         return "redirect:" + (redirectUrl != null ? redirectUrl : "/pedido");
     }
 
     // Disminuir cantidad
     @PostMapping("/disminuir")
-    public String disminuirCantidad(
-            @RequestParam(name = "index") int index,
-            @RequestParam(name = "redirectUrl", required = false) String redirectUrl) {
+    public String disminuir(@RequestParam int index,
+                            @RequestParam(required = false) String redirectUrl) {
 
         if (index >= 0 && index < pedidoActual.getDetalles().size()) {
             DetallePedido detalle = pedidoActual.getDetalles().get(index);
+
             if (detalle.getCantidad() > 1) {
                 detalle.setCantidad(detalle.getCantidad() - 1);
             } else {
                 pedidoActual.getDetalles().remove(index);
             }
         }
+
         return "redirect:" + (redirectUrl != null ? redirectUrl : "/pedido");
     }
 
-    // Eliminar detalle
+    // Eliminar producto del pedido
     @PostMapping("/eliminar")
-    public String eliminarDetalle(
-            @RequestParam(name = "index") int index,
-            @RequestParam(name = "redirectUrl", required = false) String redirectUrl) {
+    public String eliminar(@RequestParam int index,
+                           @RequestParam(required = false) String redirectUrl) {
 
         if (index >= 0 && index < pedidoActual.getDetalles().size()) {
             pedidoActual.getDetalles().remove(index);
         }
+
         return "redirect:" + (redirectUrl != null ? redirectUrl : "/pedido");
     }
 
-    // Finalizar pedido
+    // Guardar pedido en BD
     @PostMapping("/finalizar")
-    public String finalizarPedido(Model model) {
+    public String finalizar(Model model) {
+
         if (pedidoActual.getDetalles().isEmpty()) {
-            model.addAttribute("error", "El pedido está vacío.");
+            model.addAttribute("error", "Debe agregar productos al pedido.");
             return "pedido";
         }
 
-        listaPedidos.add(pedidoActual);
+        pedidoActual.setFecha(LocalDate.now());
+        Pedido pedidoGuardado = pedidoRepository.save(pedidoActual);
 
         model.addAttribute("mensaje", "¡Pedido enviado correctamente!");
-        model.addAttribute("pedidoFinalizado", pedidoActual);
+        model.addAttribute("pedidoFinalizado", pedidoGuardado);
 
-        pedidoActual = new Pedido(pedidoActual.getId() + 1, LocalDate.now());
+        // Reiniciar para un nuevo pedido
+        pedidoActual = new Pedido();
 
         return "pedido";
-    }
-
-    public List<Pedido> getListaPedidos() {
-        return listaPedidos;
     }
 }
