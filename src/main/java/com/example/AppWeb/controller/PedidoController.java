@@ -11,19 +11,28 @@ import org.springframework.web.bind.annotation.*;
 import com.example.AppWeb.model.DetallePedido;
 import com.example.AppWeb.model.Pedido;
 import com.example.AppWeb.model.Producto;
+import com.example.AppWeb.repository.PedidoRepository;
 import com.example.AppWeb.repository.ProductoRepository;
 
 @Controller
 @RequestMapping("/pedido")
+@SessionAttributes("pedidoActual") // ✅ Mantener pedido por sesión
 public class PedidoController {
 
     @Autowired
     private ProductoRepository productoRepository;
 
-    private Pedido pedidoActual = new Pedido();
+    @Autowired
+    private PedidoRepository pedidoRepository;
+
+    // ✅ Se crea un pedido nuevo por sesión de usuario
+    @ModelAttribute("pedidoActual")
+    public Pedido pedidoActual() {
+        return new Pedido();
+    }
 
     @GetMapping
-    public String mostrarPedido(Model model) {
+    public String mostrarPedido(@ModelAttribute("pedidoActual") Pedido pedidoActual, Model model) {
         model.addAttribute("pedido", pedidoActual);
         model.addAttribute("detalles", pedidoActual.getDetalles());
         model.addAttribute("total", pedidoActual.getTotal());
@@ -31,57 +40,53 @@ public class PedidoController {
     }
 
     @PostMapping("/agregar")
-    public String agregarProducto(
-            @RequestParam(name = "productoId") Integer productoId,
-            @RequestParam(name = "redirectUrl", required = false) String redirectUrl) {
+    public String agregarProducto(@ModelAttribute("pedidoActual") Pedido pedidoActual,
+                                  @RequestParam("productoId") Integer productoId,
+                                  @RequestParam(value = "redirectUrl", required = false) String redirectUrl) {
 
-        Optional<Producto> productoOpt = productoRepository.findById(productoId);
+        Producto producto = productoRepository.findById(productoId).orElse(null);
+        if (producto == null) return "redirect:/pedido";
 
-        if (productoOpt.isPresent()) {
-            Producto producto = productoOpt.get();
+        Optional<DetallePedido> existente = pedidoActual.getDetalles().stream()
+                .filter(d -> d.getProducto().getId().equals(productoId))
+                .findFirst();
 
-            Optional<DetallePedido> detalleOpt = pedidoActual.getDetalles().stream()
-                    .filter(det -> det.getProducto().getId().equals(productoId))
-                    .findFirst();
-
-            if (detalleOpt.isPresent()) {
-                detalleOpt.get().setCantidad(detalleOpt.get().getCantidad() + 1);
-            } else {
-                DetallePedido detalle = new DetallePedido();
-                detalle.setProducto(producto);
-                detalle.setCantidad(1);
-                detalle.setPedido(pedidoActual);
-
-                pedidoActual.getDetalles().add(detalle);
-            }
+        if (existente.isPresent()) {
+            existente.get().setCantidad(existente.get().getCantidad() + 1);
+        } else {
+            DetallePedido detalle = new DetallePedido();
+            detalle.setProducto(producto);
+            detalle.setCantidad(1);
+            detalle.setPedido(pedidoActual);
+            pedidoActual.getDetalles().add(detalle);
         }
 
         return "redirect:" + (redirectUrl != null ? redirectUrl : "/pedido");
     }
 
     @PostMapping("/incrementar")
-    public String incrementar(
-            @RequestParam(name = "index") int index,
-            @RequestParam(name = "redirectUrl", required = false) String redirectUrl) {
+    public String incrementar(@ModelAttribute("pedidoActual") Pedido pedidoActual,
+                              @RequestParam("index") int index,
+                              @RequestParam(value = "redirectUrl", required = false) String redirectUrl) {
 
         if (index >= 0 && index < pedidoActual.getDetalles().size()) {
-            DetallePedido detalle = pedidoActual.getDetalles().get(index);
-            detalle.setCantidad(detalle.getCantidad() + 1);
+            DetallePedido d = pedidoActual.getDetalles().get(index);
+            d.setCantidad(d.getCantidad() + 1);
         }
 
         return "redirect:" + (redirectUrl != null ? redirectUrl : "/pedido");
     }
 
     @PostMapping("/disminuir")
-    public String disminuir(
-            @RequestParam(name = "index") int index,
-            @RequestParam(name = "redirectUrl", required = false) String redirectUrl) {
+    public String disminuir(@ModelAttribute("pedidoActual") Pedido pedidoActual,
+                            @RequestParam("index") int index,
+                            @RequestParam(value = "redirectUrl", required = false) String redirectUrl) {
 
         if (index >= 0 && index < pedidoActual.getDetalles().size()) {
-            DetallePedido detalle = pedidoActual.getDetalles().get(index);
+            DetallePedido d = pedidoActual.getDetalles().get(index);
 
-            if (detalle.getCantidad() > 1) {
-                detalle.setCantidad(detalle.getCantidad() - 1);
+            if (d.getCantidad() > 1) {
+                d.setCantidad(d.getCantidad() - 1);
             } else {
                 pedidoActual.getDetalles().remove(index);
             }
@@ -91,9 +96,9 @@ public class PedidoController {
     }
 
     @PostMapping("/eliminar")
-    public String eliminar(
-            @RequestParam(name = "index") int index,
-            @RequestParam(name = "redirectUrl", required = false) String redirectUrl) {
+    public String eliminar(@ModelAttribute("pedidoActual") Pedido pedidoActual,
+                           @RequestParam("index") int index,
+                           @RequestParam(value = "redirectUrl", required = false) String redirectUrl) {
 
         if (index >= 0 && index < pedidoActual.getDetalles().size()) {
             pedidoActual.getDetalles().remove(index);
@@ -103,7 +108,7 @@ public class PedidoController {
     }
 
     @PostMapping("/finalizar")
-    public String finalizar(Model model) {
+    public String finalizar(@ModelAttribute("pedidoActual") Pedido pedidoActual, Model model) {
 
         if (pedidoActual.getDetalles().isEmpty()) {
             model.addAttribute("error", "Debe agregar productos al pedido.");
@@ -111,10 +116,15 @@ public class PedidoController {
         }
 
         pedidoActual.setFecha(LocalDate.now());
-        model.addAttribute("mensaje", "¡Pedido enviado correctamente!");
+        pedidoActual.getDetalles().forEach(d -> d.setPedido(pedidoActual));
+        pedidoRepository.save(pedidoActual); // ✅ Aquí ahora sí se guarda bien
+
+        model.addAttribute("mensaje", "✅ ¡Pedido enviado correctamente!");
         model.addAttribute("pedidoFinalizado", pedidoActual);
 
-        pedidoActual = new Pedido();
+        // ✅ Reiniciar pedido en sesión
+        model.addAttribute("pedidoActual", new Pedido());
+
         return "pedido";
     }
 }

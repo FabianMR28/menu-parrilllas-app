@@ -17,14 +17,14 @@
         </button>
         <div class="collapse navbar-collapse" id="menuNav">
             <ul class="navbar-nav ms-auto">
-                <li class="nav-item"><a class="nav-link" th:href="@{/productos/menu}" th:text="#{nav.menu}">Menu</a></li>
-                <li class="nav-item"><a class="nav-link active" th:href="@{/especiales}" th:text="#{nav.especiales}">Especiales</a></li>
-                <li class="nav-item"><a class="nav-link" th:href="@{/bebidas}" th:text="#{nav.bebidas}">Bebidas</a></li>
-                <li class="nav-item"><a class="nav-link" th:href="@{/extras}" th:text="#{nav.extras}">Extras</a></li>
-                <li class="nav-item"><a class="nav-link" th:href="@{/parrillas}" th:text="#{nav.parrillas}">Parrillas</a></li>
-                <li class="nav-item"><a class="nav-link" th:href="@{/brasas}" th:text="#{nav.brasas}">Brasas</a></li>
-                <li class="nav-item"><a class="nav-link" th:href="@{/contacto/form}" th:text="#{nav.contacto}">Contacto</a></li>
-                <li class="nav-item"><a class="nav-link" th:href="@{/pedido}" th:text="#{nav.pedido}">Mi Pedido</a></li>
+                <li class="nav-item"><a class="nav-link" th:href="@{/productos/menu}" th:text="#{nav.menu}"></a></li>
+                <li class="nav-item"><a class="nav-link active" th:href="@{/especiales}" th:text="#{nav.especiales}"></a></li>
+                <li class="nav-item"><a class="nav-link" th:href="@{/bebidas}" th:text="#{nav.bebidas}"></a></li>
+                <li class="nav-item"><a class="nav-link" th:href="@{/extras}" th:text="#{nav.extras}"></a></li>
+                <li class="nav-item"><a class="nav-link" th:href="@{/parrillas}" th:text="#{nav.parrillas}"></a></li>
+                <li class="nav-item"><a class="nav-link" th:href="@{/brasas}" th:text="#{nav.brasas}"></a></li>
+                <li class="nav-item"><a class="nav-link" th:href="@{/contacto/form}" th:text="#{nav.contacto}"></a></li>
+                <li class="nav-item"><a class="nav-link" th:href="@{/pedido}" th:text="#{nav.pedido}"></a></li>
             </ul>
         </div>
     </div>
@@ -34,50 +34,60 @@
     <h2 class="mb-4 text-center" th:text="#{pedido.titulo}">Mi Pedido</h2>
 
     <div th:if="${#lists.isEmpty(detalles)}" class="alert alert-info" th:text="#{pedido.vacio}">
-        No hay productos en el pedido.
     </div>
 
     <table class="table table-striped" th:if="${!#lists.isEmpty(detalles)}">
         <thead>
             <tr>
-                <th th:text="#{pedido.producto}">Producto</th>
-                <th th:text="#{pedido.precio}">Precio</th>
-                <th th:text="#{pedido.cantidad}">Cantidad</th>
-                <th th:text="#{pedido.subtotal}">Subtotal</th>
-                <th th:text="#{pedido.acciones}">Acciones</th>
+                <th th:text="#{pedido.producto}"></th>
+                <th th:text="#{pedido.precio}"></th>
+                <th th:text="#{pedido.cantidad}"></th>
+                <th th:text="#{pedido.subtotal}"></th>
+                <th th:text="#{pedido.acciones}"></th>
             </tr>
         </thead>
-        <tbody>
-            <tr th:each="detalle, iterStat : ${detalles}">
-                <td th:text="#{${detalle.producto.nombre}}"></td>
-                <td>S/. <span th:text="${detalle.producto.precio}"></span></td>
-                <td th:text="${detalle.cantidad}"></td>
-                <td>S/. <span th:text="${detalle.subtotal}"></span></td>
-                <td>
-                    <form th:action="@{/pedido/incrementar}" method="post" style="display:inline">
-                        <input type="hidden" name="index" th:value="${iterStat.index}">
-                        <button class="btn btn-sm btn-success" th:text="#{pedido.mas}">+</button>
-                    </form>
-                    <form th:action="@{/pedido/disminuir}" method="post" style="display:inline">
-                        <input type="hidden" name="index" th:value="${iterStat.index}">
-                        <button class="btn btn-sm btn-warning" th:text="#{pedido.menos}">-</button>
-                    </form>
-                    <form th:action="@{/pedido/eliminar}" method="post" style="display:inline">
-                        <input type="hidden" name="index" th:value="${iterStat.index}">
-                        <button class="btn btn-sm btn-danger" th:text="#{pedido.eliminar}">X</button>
-                    </form>
-                </td>
-            </tr>
-        </tbody>
+			<tbody>
+			<tr th:each="detalle, iterStat : ${detalles}">
+			    <td th:text="${detalle.producto.nombre}"></td>
+			    <td>S/. <span th:text="${#numbers.formatDecimal(detalle.producto.precio,1,2)}"></span></td>
+			
+			    <td>
+			        <form th:action="@{/pedido/disminuir}" method="post" style="display:inline">
+			            <input type="hidden" name="index" th:value="${iterStat.index}">
+			            <input type="hidden" name="redirectUrl" value="/pedido">
+			            <button class="btn btn-sm btn-warning">-</button>
+			        </form>
+			
+			        <span class="mx-2 fw-bold" th:text="${detalle.cantidad}"></span>
+			
+			        <form th:action="@{/pedido/incrementar}" method="post" style="display:inline">
+			            <input type="hidden" name="index" th:value="${iterStat.index}">
+			            <input type="hidden" name="redirectUrl" value="/pedido">
+			            <button class="btn btn-sm btn-success">+</button>
+			        </form>
+			    </td>
+			
+			    <td>S/. <span th:text="${#numbers.formatDecimal(detalle.subtotal,1,2)}"></span></td>
+			
+			    <td>
+			        <form th:action="@{/pedido/eliminar}" method="post" style="display:inline">
+			            <input type="hidden" name="index" th:value="${iterStat.index}">
+			            <input type="hidden" name="redirectUrl" value="/pedido">
+			            <button class="btn btn-sm btn-danger">X</button>
+			        </form>
+			    </td>
+			</tr>
+			</tbody>
+
     </table>
 
     <h4 class="mt-4 text-end">
-        <span th:text="#{pedido.total}">Total:</span> S/. <span th:text="${total}"></span>
+        <span th:text="#{pedido.total}"></span> S/. <span th:text="${total}"></span>
     </h4>
 
     <div class="text-end mt-4" th:if="${!#lists.isEmpty(detalles)}">
         <form th:action="@{/pedido/finalizar}" method="post">
-            <button type="submit" class="btn btn-success btn-lg" th:text="#{pedido.finalizar}">Finalizar Pedido</button>
+            <button type="submit" class="btn btn-success btn-lg" th:text="#{pedido.finalizar}"></button>
         </form>
     </div>
 
