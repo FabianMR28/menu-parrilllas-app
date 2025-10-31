@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Inicio de Sesión - Parrillas & Brasas</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/estilos.css}">
+</head>
+
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" th:href="@{/}">🍖 <span th:text="#{app.name}">Parrillas & Brasas</span></a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#menuNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="menuNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" th:href="@{/especiales}" th:text="#{nav.especiales}">Especiales</a></li>
+                    <li class="nav-item"><a class="nav-link" th:href="@{/bebidas}" th:text="#{nav.bebidas}">Bebidas</a></li>
+                    <li class="nav-item"><a class="nav-link" th:href="@{/extras}" th:text="#{nav.extras}">Extras</a></li>
+                    <li class="nav-item"><a class="nav-link" th:href="@{/parrillas}" th:text="#{nav.parrillas}">Parrillas</a></li>
+                    <li class="nav-item"><a class="nav-link" th:href="@{/brasas}" th:text="#{nav.brasas}">Brasas</a></li>
+                    <li class="nav-item"><a class="nav-link" th:href="@{/contacto}"th:text="#{nav.contacto}">Contacto</a></li>
+                    <li class="nav-item"><a class="nav-link" th:href="@{/pedido}" th:text="#{nav.pedido}">Mi Pedido</a></li>
+                    <li class="nav-item"><a class="nav-link active" th:href="@{/login}" th:text="#{nav.login}">Iniciar Sesion</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Contenido dinámico -->
+    <div class="container vh-100 d-flex justify-content-center align-items-center">
+	    <form th:action="@{/registro}" th:object="${usuario}" method="post"
+	          class="p-4 shadow rounded bg-dark bg-opacity-50 text-white col-12 col-md-8 col-lg-5">
+	        <h2 class="mb-4 text-center">Crear Cuenta</h2>
+	
+	        <!-- Nombre completo -->
+	        <div class="mb-3">
+	            <label for="nombreCompleto" class="form-label">Nombre completo</label>
+	            <input type="text" id="nombreCompleto" th:field="*{nombreCompleto}" 
+	                   class="form-control bg-dark text-white"
+	                   placeholder="Ej. Juan Pérez" required>
+	        </div>
+	
+	        <!-- Correo -->
+	        <div class="mb-3">
+	            <label for="correo" class="form-label">Correo electrónico</label>
+	            <input type="email" id="correo" th:field="*{correo}" 
+	                   class="form-control bg-dark text-white"
+	                   placeholder="ejemplo@gmail.com" required>
+	        </div>
+	        
+	        <!-- Correo -->
+	        <div class="mb-3">
+	            <label for="telefono" class="form-label">Teléfono</label>
+	            <input type="number" id="telefono" th:field="*{correo}" 
+	                   class="form-control bg-dark text-white"
+	                   placeholder="999999999">
+	        </div>
+	
+	        <!-- Nombre de usuario -->
+	        <div class="mb-3">
+	            <label for="nombreUsuario" class="form-label">Nombre de usuario</label>
+	            <input type="text" id="nombreUsuario" th:field="*{nombreUsuario}" 
+	                   class="form-control bg-dark text-white"
+	                   placeholder="usuario123" required>
+	        </div>
+	
+	        <!-- Contraseña -->
+	        <div class="mb-3">
+	            <label for="contrasena" class="form-label">Contraseña</label>
+	            <input type="password" id="contrasena" th:field="*{contrasena}" 
+	                   class="form-control bg-dark text-white"
+	                   placeholder="********" required>
+	        </div>
+	
+	        <!-- Confirmar contraseña -->
+	        <div class="mb-3">
+	            <label for="confirmar" class="form-label">Confirmar contraseña</label>
+	            <input type="password" id="confirmar" name="confirmar"
+	                   class="form-control bg-dark text-white"
+	                   placeholder="********" required>
+	        </div>
+	
+	        <!-- Botón -->
+	        <div class="text-center mt-4">
+	            <button type="submit" class="btn btn-success w-100">Registrar</button>
+	        </div>
+			
+			<div th:if="${error}" 
+             class="alert alert-danger text-center p-2 mb-3 mt-5"
+             th:text="${error}"
+             style="border-radius: 10px;"></div>
+			
+	        <!-- Enlace login -->
+	        <div class="text-center mt-3">
+	            <a th:href="@{/login}" class="text-decoration-none text-light">
+	                ¿Ya tienes cuenta? Inicia sesión aquí
+	            </a>
+	        </div>
+	    </form>
+	</div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>
