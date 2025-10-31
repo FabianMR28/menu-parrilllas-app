@@ -33,6 +33,27 @@ public class ProductoController {
         return "lista_producto";
     }
 
+    // ✅ Buscar por ID
+    @GetMapping("/buscar/id")
+    public String buscarPorId(@RequestParam("id") Integer id, Model model) {
+        model.addAttribute("productos", productoRepository.findByIdEquals(id));
+        return "lista_producto";
+    }
+
+    // ✅ Buscar por precio menor o igual
+    @GetMapping("/buscar/precio-menor")
+    public String buscarPorPrecioMenor(@RequestParam("precio") Double precio, Model model) {
+        model.addAttribute("productos", productoRepository.findByPrecioLessThanEqual(precio));
+        return "lista_producto";
+    }
+
+    // ✅ Buscar por precio mayor o igual
+    @GetMapping("/buscar/precio-mayor")
+    public String buscarPorPrecioMayor(@RequestParam("precio") Double precio, Model model) {
+        model.addAttribute("productos", productoRepository.findByPrecioGreaterThanEqual(precio));
+        return "lista_producto";
+    }
+
     // Guardar / Registrar
     @PostMapping("/guardar")
     public String guardar(@ModelAttribute Producto producto) {
@@ -54,13 +75,13 @@ public class ProductoController {
         return "redirect:/productos";
     }
 
+    // Mostrar menú
     @GetMapping("/menu")
     public String mostrarMenu(@RequestParam(value = "busqueda", required = false) String busqueda, Model model) {
         List<Producto> productos;
 
         if (busqueda != null && !busqueda.isEmpty()) {
-            productos = productoRepository.findByNombreContainingIgnoreCaseOrCategoriaContainingIgnoreCase(busqueda,
-                    busqueda);
+            productos = productoRepository.findByNombreContainingIgnoreCaseOrCategoriaContainingIgnoreCase(busqueda, busqueda);
         } else {
             productos = productoRepository.findAll();
         }
@@ -70,5 +91,4 @@ public class ProductoController {
 
         return "menu";
     }
-
 }
