@@ -1,34 +1,21 @@
 package com.example.AppWeb.model;
 
-import jakarta.persistence.*;
-
-@Entity
-@Table(name = "detalle_pedido")
 public class DetallePedido {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id; // ← CAMBIADO A INTEGER
-
-    @ManyToOne
-    @JoinColumn(name = "pedido_id")
-    private Pedido pedido;
-
-    @ManyToOne
-    @JoinColumn(name = "producto_id")
+    private Integer id; // ya no se genera automáticamente
+    private Pedido pedido; // relación simple en memoria
     private Producto producto;
-
     private int cantidad;
 
     public double getSubtotal() {
         return producto.getPrecio() * cantidad;
     }
 
-    public Integer getId() { // ← CAMBIADO A INTEGER
+    public Integer getId() {
         return id;
     }
 
-    public void setId(Integer id) { // ← CAMBIADO A INTEGER
+    public void setId(Integer id) {
         this.id = id;
     }
 

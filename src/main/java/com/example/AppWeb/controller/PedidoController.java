@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.*;
 import com.example.AppWeb.model.DetallePedido;
 import com.example.AppWeb.model.Pedido;
 import com.example.AppWeb.model.Producto;
-import com.example.AppWeb.repository.PedidoRepository;
 import com.example.AppWeb.repository.ProductoRepository;
 
 @Controller
@@ -21,13 +20,8 @@ public class PedidoController {
     @Autowired
     private ProductoRepository productoRepository;
 
-    @Autowired
-    private PedidoRepository pedidoRepository;
-
-    // Pedido temporal (no guardado aún)
     private Pedido pedidoActual = new Pedido();
 
-    // Mostrar pedido
     @GetMapping
     public String mostrarPedido(Model model) {
         model.addAttribute("pedido", pedidoActual);
@@ -36,18 +30,16 @@ public class PedidoController {
         return "pedido";
     }
 
-    // Agregar producto al pedido
     @PostMapping("/agregar")
     public String agregarProducto(
-            @RequestParam Integer productoId,
-            @RequestParam(required = false) String redirectUrl) {
+            @RequestParam(name = "productoId") Integer productoId,
+            @RequestParam(name = "redirectUrl", required = false) String redirectUrl) {
 
         Optional<Producto> productoOpt = productoRepository.findById(productoId);
 
         if (productoOpt.isPresent()) {
             Producto producto = productoOpt.get();
 
-            // Buscar si ya existe en el pedido
             Optional<DetallePedido> detalleOpt = pedidoActual.getDetalles().stream()
                     .filter(det -> det.getProducto().getId().equals(productoId))
                     .findFirst();
@@ -67,10 +59,10 @@ public class PedidoController {
         return "redirect:" + (redirectUrl != null ? redirectUrl : "/pedido");
     }
 
-    // Incrementar cantidad
     @PostMapping("/incrementar")
-    public String incrementar(@RequestParam int index,
-                              @RequestParam(required = false) String redirectUrl) {
+    public String incrementar(
+            @RequestParam(name = "index") int index,
+            @RequestParam(name = "redirectUrl", required = false) String redirectUrl) {
 
         if (index >= 0 && index < pedidoActual.getDetalles().size()) {
             DetallePedido detalle = pedidoActual.getDetalles().get(index);
@@ -80,10 +72,10 @@ public class PedidoController {
         return "redirect:" + (redirectUrl != null ? redirectUrl : "/pedido");
     }
 
-    // Disminuir cantidad
     @PostMapping("/disminuir")
-    public String disminuir(@RequestParam int index,
-                            @RequestParam(required = false) String redirectUrl) {
+    public String disminuir(
+            @RequestParam(name = "index") int index,
+            @RequestParam(name = "redirectUrl", required = false) String redirectUrl) {
 
         if (index >= 0 && index < pedidoActual.getDetalles().size()) {
             DetallePedido detalle = pedidoActual.getDetalles().get(index);
@@ -98,10 +90,10 @@ public class PedidoController {
         return "redirect:" + (redirectUrl != null ? redirectUrl : "/pedido");
     }
 
-    // Eliminar producto del pedido
     @PostMapping("/eliminar")
-    public String eliminar(@RequestParam int index,
-                           @RequestParam(required = false) String redirectUrl) {
+    public String eliminar(
+            @RequestParam(name = "index") int index,
+            @RequestParam(name = "redirectUrl", required = false) String redirectUrl) {
 
         if (index >= 0 && index < pedidoActual.getDetalles().size()) {
             pedidoActual.getDetalles().remove(index);
@@ -110,7 +102,6 @@ public class PedidoController {
         return "redirect:" + (redirectUrl != null ? redirectUrl : "/pedido");
     }
 
-    // Guardar pedido en BD
     @PostMapping("/finalizar")
     public String finalizar(Model model) {
 
@@ -120,14 +111,10 @@ public class PedidoController {
         }
 
         pedidoActual.setFecha(LocalDate.now());
-        Pedido pedidoGuardado = pedidoRepository.save(pedidoActual);
-
         model.addAttribute("mensaje", "¡Pedido enviado correctamente!");
-        model.addAttribute("pedidoFinalizado", pedidoGuardado);
+        model.addAttribute("pedidoFinalizado", pedidoActual);
 
-        // Reiniciar para un nuevo pedido
         pedidoActual = new Pedido();
-
         return "pedido";
     }
 }
