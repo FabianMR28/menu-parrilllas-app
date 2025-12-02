@@ -1,17 +1,9 @@
 package com.example.AppWeb.model;
 
-import java.time.LocalDateTime;
-
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 
 @Entity
-@Table(name = "usuarios")
+@Table(name = "usuario")
 public class Usuario {
 
     @Id
@@ -19,85 +11,35 @@ public class Usuario {
     private Long id;
 
     @Column(nullable = false, unique = true)
-    private String nombreUsuario;
+    private String username;
 
     @Column(nullable = false)
-    private String contrasena;
-
-    private String nombreCompleto;
+    private String password;
 
     @Column(nullable = false, unique = true)
     private String correo;
 
-    private String telefono;
+    private boolean enabled = true;
 
-    @Column(nullable = false)
-    private String rol; // "ADMIN" o "CLIENTE"
+    // ----- Getters y Setters -----
 
-    private Boolean activo = true;
+    public Long getId() { return id; }
 
-    @Column(name = "fecha_registro")
-    private LocalDateTime fechaRegistro;
+    public void setId(Long id) { this.id = id; }
 
-    @PrePersist
-    public void prePersist() {
-        this.fechaRegistro = LocalDateTime.now();
-    }
+    public String getUsername() { return username; }
 
-    // --- Getters y Setters ---
+    public void setUsername(String username) { this.username = username; }
 
-    public Long getId() {
-        return id;
-    }
-    public void setId(Long id) {
-        this.id = id;
-    }
-    public String getNombreUsuario() {
-        return nombreUsuario;
-    }
-    public void setNombreUsuario(String nombreUsuario) {
-        this.nombreUsuario = nombreUsuario;
-    }
-    public String getContrasena() {
-        return contrasena;
-    }
-    public void setContrasena(String contrasena) {
-        this.contrasena = contrasena;
-    }
-    public String getNombreCompleto() {
-        return nombreCompleto;
-    }
-    public void setNombreCompleto(String nombreCompleto) {
-        this.nombreCompleto = nombreCompleto;
-    }
-    public String getCorreo() {
-        return correo;
-    }
-    public void setCorreo(String correo) {
-        this.correo = correo;
-    }
-    public String getTelefono() {
-        return telefono;
-    }
-    public void setTelefono(String telefono) {
-        this.telefono = telefono;
-    }
-    public String getRol() {
-        return rol;
-    }
-    public void setRol(String rol) {
-        this.rol = rol;
-    }
-    public Boolean getActivo() {
-        return activo;
-    }
-    public void setActivo(Boolean activo) {
-        this.activo = activo;
-    }
-    public LocalDateTime getFechaRegistro() {
-        return fechaRegistro;
-    }
-    public void setFechaRegistro(LocalDateTime fechaRegistro) {
-        this.fechaRegistro = fechaRegistro;
-    }
+    public String getPassword() { return password; }
+
+    public void setPassword(String password) { this.password = password; }
+
+    public String getCorreo() { return correo; }
+
+    public void setCorreo(String correo) { this.correo = correo; }
+
+    public boolean isEnabled() { return enabled; }
+
+    public void setEnabled(boolean enabled) { this.enabled = enabled; }
 }
